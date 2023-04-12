@@ -1,0 +1,5 @@
+runtime: python39
+env: standard
+handlers:
+  - url: /
+    script: auto
