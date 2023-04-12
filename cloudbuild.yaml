@@ -1,0 +1,33 @@
+steps:
+  # Install dependencies
+  - name: python
+    entrypoint: pip
+    args: ["install", "-r", "requirements.txt", "--user"]
+  # [START cloudbuild_python_tests_yaml]
+  # Run unit tests
+  - name: python
+    entrypoint: python
+    args: ["-m", "pytest", "--junitxml=${SHORT_SHA}_test_log.xml"] 
+  # [END cloudbuild_python_tests_yaml]
+
+  # [START cloudbuild_python_image_yaml]
+  # Docker Build
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 
+           'us-central1-docker.pkg.dev/${PROJECT_ID}/${_ARTIFACT_REGISTRY_REPO}/myimage:${SHORT_SHA}', '.']
+  # [END cloudbuild_python_image_yaml]
+
+  # [START cloudbuild_python_push_yaml]
+  # Docker push to Google Artifact Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push',  'us-central1-docker.pkg.dev/${PROJECT_ID}/${_ARTIFACT_REGISTRY_REPO}/myimage:${SHORT_SHA}']
+  # [END cloudbuild_python_push_yaml]
+  
+  # [START cloudbuild_python_deploy_yaml]
+  # Deploy to Cloud Run
+  - name: google/cloud-sdk
+    args: ['gcloud', 'run', 'deploy', 'helloworld-${SHORT_SHA}', 
+           '--image=us-central1-docker.pkg.dev/${PROJECT_ID}/${_ARTIFACT_REGISTRY_REPO}/myimage:${SHORT_SHA}', 
+           '--region', 'us-central1', '--platform', 'managed', 
+           '--allow-unauthenticated']
+  # [END cloudbuild_python_deploy_yaml]
