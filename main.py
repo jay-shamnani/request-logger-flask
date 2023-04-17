@@ -8,6 +8,7 @@ def index():
     print('Request Headers: \n', request.headers)
     print('Request Data: \n', request.data)
     print('Request Method: \n', request.method)
+    print('Request Method 2: \n', request.method)
     return 'Web App with Python Flask!'
 
 if __name__ == '__main__':
